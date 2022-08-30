@@ -1,0 +1,20 @@
+version: 1.4
+squad: Operations
+human_description: "Public repository to store reusable workflows"
+
+production:
+  endpoint_url:
+staging:
+  endpoint_url:
+
+references:
+  - name: 'Github Actions Reusing Workflows'
+    url: https://docs.github.com/en/actions/using-workflows/reusing-workflows#overview
+
+primary_languages:
+    - yml
+
+wiki_categories:
+  - continuous integration
+
+support_level: Full
