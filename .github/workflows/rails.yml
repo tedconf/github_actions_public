@@ -37,6 +37,14 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
+      - name: Check for SASL dependencies
+        id: sasl
+        run: |
+          echo ::set-output name=dependency::$(grep memcached Gemfile.lock | wc -l)
+      - name: Install SASL
+        if: steps.sasl.outputs.dependency > 0
+        run: |
+          sudo apt-get -y install libsasl2-dev
       - name: Set up Ruby
         # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
         # change this to ruby/setup-ruby@v1 (see
