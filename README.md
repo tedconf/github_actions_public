@@ -23,7 +23,6 @@ and deploy it.
 1. Create a workflow file under `.github/workflows/` and call the reusable
    workflow.
 1. `git rm Jenkinsfile`
-1. `git mv config/secrets.jenkins.yml config/secrets.github.yml`
-  1. You'll also need to change the MySQL/database root password to `root`, as
-     the OS for our runners (currently Ubuntu) do not allow a blank password
-     for the root user.
+1. `git mv config/secrets.jenkins.yml config/secrets.github.yml`. You'll also
+   need to change the MySQL/database root password to `root`, as the OS for our
+   runners (currently Ubuntu) do not allow a blank password for the root user.
