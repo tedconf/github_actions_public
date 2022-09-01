@@ -22,16 +22,17 @@ jobs:
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
     steps:
       - uses: actions/checkout@v3
-#      - name: setup and start elasticsearch
-#        if: inputs.coyote-integration-tests
-#        uses: tedconf/elasticsearch-github-actions@v2.0.0
-#        with:
-#          stack-version: 6.8.23
-#          plugins: 'analysis-icu analysis-phonetic'
-#      - name: Elasticsearch is reachable
-#        if: inputs.coyote-integration-tests
-#        run: |
-#          curl --verbose --show-error http://localhost:9200
+      - name: Setup and start Elasticsearch
+        uses: tedconf/elasticsearch-github-actions@v2.0.0
+        if: inputs.coyote-integration-tests
+        with:
+          stack-version: 6.8.23
+          plugins: 'analysis-icu analysis-phonetic'
+      - name: Elasticsearch is reachable
+        if: inputs.coyote-integration-tests
+        run: |
+          curl --verbose --show-error http://localhost:9200
+
       # Setup SSH agent first to allow for checking out repos using SSH, as needed
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.5.3
