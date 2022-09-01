@@ -21,9 +21,9 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup and start Elasticsearch
-        uses: tedconf/elasticsearch-github-actions@v2.0.0
+        uses: tedconf/elasticsearch-github-actions/.github/workflows/elasticsearch.yml@lee-test
         if: inputs.coyote-integration-tests
         with:
           stack-version: 6.8.23
