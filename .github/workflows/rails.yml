@@ -17,7 +17,17 @@ on:
 jobs:
   setup-coyote:
     runs-on: self-hosted
-    uses: tedconf/elasticsearch-github-actions/.github/workflows/elasticsearch.yml@lee-test
+    steps:
+      - name: Setup and start Elasticsearch
+        uses: tedconf/elasticsearch-github-actions/.github/workflows/elasticsearch.yml@lee-test
+        if: inputs.coyote-integration-tests
+        with:
+          stack-version: 6.8.23
+          plugins: 'analysis-icu analysis-phonetic'
+      - name: Elasticsearch is reachable
+        if: inputs.coyote-integration-tests
+        run: |
+          curl --verbose --show-error http://localhost:9200
   test-and-deploy:
     runs-on: self-hosted
     env:
