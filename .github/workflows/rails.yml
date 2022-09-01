@@ -18,11 +18,6 @@ jobs:
   setup-coyote:
     runs-on: self-hosted
     uses: tedconf/elasticsearch-github-actions/.github/workflows/elasticsearch.yml@lee-test
-    steps:
-      - name: Elasticsearch is reachable
-        if: inputs.coyote-integration-tests
-        run: |
-          curl --verbose --show-error http://localhost:9200
   test-and-deploy:
     runs-on: self-hosted
     env:
