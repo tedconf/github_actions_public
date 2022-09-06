@@ -16,7 +16,7 @@ on:
 
 jobs:
   setup-coyote:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Setup and start Elasticsearch
         uses: tedconf/elasticsearch-github-actions/.github/workflows/elasticsearch.yml@lee-test
