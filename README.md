@@ -16,8 +16,8 @@ reusable workflow by looking at its `on.workflow_call` section.
 If the testing process succeeds, the current rails workflow will automatically
 deploy to staging environments when a branch is merged into the trunk, but if
 you want to deploy a feature branch to staging as well, just include the string
-`feature-branch` anywhere in the branch name and the workflow will pick it up
-and deploy it.
+`fbranch` anywhere in the branch name and the workflow will pick it up and
+deploy it.
 
 ## Migrating From Jenkins
 1. Create a workflow file under `.github/workflows/` and call the reusable
