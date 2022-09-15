@@ -21,39 +21,7 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
     steps:
-      - uses: actions/checkout@v3
-#      - name: setup and start elasticsearch
-#        if: inputs.coyote-integration-tests
-#        uses: tedconf/elasticsearch-github-actions@v2.0.0
-#        with:
-#          stack-version: 6.8.23
-#          plugins: 'analysis-icu analysis-phonetic'
-#      - name: Elasticsearch is reachable
-#        if: inputs.coyote-integration-tests
-#        run: |
-#          curl --verbose --show-error http://localhost:9200
-      # Setup SSH agent first to allow for checking out repos using SSH, as needed
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
-      - name: Check for SASL dependencies
-        id: sasl
-        run: |
-          echo ::set-output name=dependency::$(grep memcached Gemfile.lock | wc -l)
-      - name: Install SASL
-        if: steps.sasl.outputs.dependency > 0
-        run: |
-          sudo apt-get -y install libsasl2-dev
-      - name: Set up Ruby
-        # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
-        # change this to ruby/setup-ruby@v1 (see
-        # https://github.com/ruby/setup-ruby#versioning)
-        uses: ruby/setup-ruby@v1.111.0
-        env:
-          BUNDLE_RUBYGEMS__TED__COM: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
-        with:
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - uses: tedconf/setup-ruby@1.0.0
       - name: Update bundle-audit
         run: bundle exec bundle-audit update
       - name: Gem audit (with CVE ignorelist)
