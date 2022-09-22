@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup and start Elasticsearch
-        uses: tedconf/elasticsearch-github-actions@v2.0.0
+        uses: tedconf/elasticsearch-github-actions@lee-self_hosted
         if: inputs.coyote-integration-tests
         with:
           stack-version: 6.8.23
