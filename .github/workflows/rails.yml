@@ -23,6 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: debug output
+        shell: bash
+        run: |
+          "Reusable workflow running from $HOSTNAME" $(ip addr)
+
       - name: Setup and start Elasticsearch
         #uses: tedconf/elasticsearch-github-actions@ppagan-es-testing
         uses: tedconf/elasticsearch-github-actions@lee-self_hosted
