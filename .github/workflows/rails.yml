@@ -23,12 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Debugging - show what host this is running on
-      - name: Debug output
-        shell: bash
-        run: |
-          echo 'The reusable workflow Rails is running from:' $HOSTNAME $(ip addr)
-
       - name: Setup and start Elasticsearch
         uses: tedconf/elasticsearch-github-actions@ppagan-es-testing
         if: inputs.coyote-integration-tests
