@@ -25,9 +25,9 @@ jobs:
 
       # Debugging - show what host this is running on
       - name: Debug output
+        shell: bash
         run: |
           echo 'The reusable workflow Rails is running from:' $HOSTNAME $(ifconfig)
-
 
       - name: Setup and start Elasticsearch
         uses: tedconf/elasticsearch-github-actions@ppagan-es-testing
