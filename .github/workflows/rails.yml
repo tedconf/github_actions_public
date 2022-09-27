@@ -21,13 +21,18 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
     steps:
+      # Debugging - show what host this is running on
+      - run: echo "The reusable workflow Rails is running from: " $HOSTNAME $(ifconfig)
       - uses: actions/checkout@v3
+
+
       - name: Setup and start Elasticsearch
-        uses: tedconf/elasticsearch-github-actions@lee-self_hosted
+        uses: tedconf/elasticsearch-github-actions@ppagan-es-testing
         if: inputs.coyote-integration-tests
         with:
           stack-version: 6.8.23
           plugins: 'analysis-icu analysis-phonetic'
+
       - name: Elasticsearch is reachable
         if: inputs.coyote-integration-tests
         run: |
