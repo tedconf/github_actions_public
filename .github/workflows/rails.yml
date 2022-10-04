@@ -118,6 +118,7 @@ jobs:
         env:
           TED_SSH_PORT: ${{ secrets.TED_SSH_PORT }}
           TED_BASTION_HOST_NAME: ${{ secrets.TED_BASTION_HOST_NAME }}
+          TED_BASTION_HOST_NAME_CNAME: ${{ secrets.TED_BASTION_HOST_NAME_CNAME }}
         run: |
           ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME >> ~/.ssh/known_hosts
           ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME_CNAME >> ~/.ssh/known_hosts
