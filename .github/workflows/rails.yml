@@ -120,6 +120,7 @@ jobs:
           TED_BASTION_HOST_NAME: ${{ secrets.TED_BASTION_HOST_NAME }}
         run: |
           ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME >> ~/.ssh/known_hosts
+          ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME_CNAME >> ~/.ssh/known_hosts
       - name: Feature branch upload configuration
         if: ${{ !env.ACT && contains(github.ref, 'fbranch') }}
         env:
