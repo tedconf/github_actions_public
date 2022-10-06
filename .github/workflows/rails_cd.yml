@@ -1,0 +1,51 @@
+name: Rails continuous deployment workflow
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  continuous-deployment:
+    runs-on: self-hosted
+    steps:
+      - uses: tedconf/setup-ruby@1.0.1
+        with:
+          ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
+          rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
+      - name: Import GPG key
+        if: ${{ !env.ACT }}
+        uses: crazy-max/ghaction-import-gpg@v4
+        with:
+          gpg_private_key: ${{ secrets.RAILS_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.RAILS_GPG_PASSPHRASE }}
+      - name: Add gateway to known hosts
+        if: ${{ (github.ref == 'refs/heads/master' || contains(github.ref, 'fbranch')) && !env.ACT }}
+        env:
+          TED_SSH_PORT: ${{ secrets.TED_SSH_PORT }}
+          TED_BASTION_HOST_NAME: ${{ secrets.TED_BASTION_HOST_NAME }}
+          TED_BASTION_HOST_NAME_CNAME: ${{ secrets.TED_BASTION_HOST_NAME_CNAME }}
+        run: |
+          ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME >> ~/.ssh/known_hosts
+          ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME_CNAME >> ~/.ssh/known_hosts
+      - name: Feature branch upload configuration
+        if: ${{ !env.ACT && contains(github.ref, 'fbranch') }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
+        # suppress tty output
+        shell: 'script --return --quiet --command "bash {0}"'
+        run: |
+          bundle exec cap staging git:${GITHUB_REF##*/} nginx:upload_site_config unicorn:upload_initd
+      - name: Stage branch
+        if: ${{ (github.ref == 'refs/heads/master' || contains(github.ref, 'fbranch')) && !env.ACT }}
+        id: staging
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
+        # supress tty output
+        shell: 'script --return --quiet --command "bash {0}"'
+        run: |
+          bundle exec cap staging git:${GITHUB_REF##*/} deploy unicorn:restart nginx:reload with_database=false create_dns=true
