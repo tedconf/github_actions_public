@@ -10,13 +10,13 @@ on:
         default: ""
 
 jobs:
-  integrate:
+  integration:
     uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@lee-test_setup_ruby_ca
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist  }}
 
-  deploy:
-    needs: test
+  deployment:
+    needs: integration
     uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@lee-test_setup_ruby_ca
     secrets: inherit
