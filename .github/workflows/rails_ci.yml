@@ -11,7 +11,7 @@ on:
 
 jobs:
   static-analyses:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analsyes.yml@lee-test_setup_ruby_ca
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analyses.yml@lee-test_setup_ruby_ca
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist }}
