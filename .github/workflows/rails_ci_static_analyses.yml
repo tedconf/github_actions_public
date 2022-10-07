@@ -1,0 +1,44 @@
+name: Ruby and/or Rails static analyses
+
+on:
+  workflow_call:
+    inputs:
+      cve-ignorelist:
+        description: "space-delimited string of CVEs to ignore"
+        type: string
+        required: false
+        default: ""
+
+name: Ruby and/or Rails static analyses
+
+on:
+  workflow_call:
+    inputs:
+      cve-ignorelist:
+        description: "space-delimited string of CVEs to ignore"
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  runs-on: self-hosted
+  steps:
+    - uses: tedconf/setup-ruby@0.0.1
+      with:
+        ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
+        rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
+    - name: Update bundle-audit
+      run: bundle exec bundle-audit update
+    - name: Gem audit (with CVE ignorelist)
+      if: inputs.cve-ignorelist != ''
+      run: |
+        bundle exec bundler-audit --ignore ${{ inputs.cve-ignorelist }}
+    - name: Gem audit (without CVE ignorelist)
+      if: inputs.cve-ignorelist == ''
+      run: bundle exec bundler-audit
+    - name: Scan code for vulnerabilities
+      run: |
+        bundle exec brakeman -q -w2
+    - name: Run rubocop linters
+      run: |
+        bundle exec rubocop --parallel

@@ -1,0 +1,67 @@
+name: Ruby and/or Rails static analyses
+
+on:
+  workflow_call:
+
+jobs:
+  runs-on: self-hosted
+  env:
+    RAILS_ENV: test
+    DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
+  steps:
+    - uses: tedconf/setup-ruby@0.0.1
+      with:
+        ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
+        rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
+    - name: Check for coyote gem
+      shell: bash
+      id: coyote
+      run: |
+        echo "::set-output name=count::$(grep coyote Gemfile.lock | wc -l)"
+    - name: Configure sysctl limits on localhost to be able to run Elasticsearch
+      # Required to get Elasticsearch container to run on shgar host
+      shell: bash
+      if: steps.coyote.outputs.count > 0
+      run: |
+        sudo swapoff -a
+        sudo sysctl -w vm.swappiness=1
+        sudo sysctl -w fs.file-max=262144
+        sudo sysctl -w vm.max_map_count=262144
+    - name: Setup and start Elasticsearch
+      uses: tedconf/elasticsearch-github-actions@lee-self_hosted
+      if: steps.coyote.outputs.count > 0
+      with:
+        stack-version: 6.8.23
+        plugins: 'analysis-icu analysis-phonetic'
+
+    - name: Elasticsearch is reachable
+      if: steps.coyote.outputs.count > 0
+      run: |
+        curl --verbose --show-error http://localhost:9200
+    - name: Set up test secrets
+      run: cp config/secrets.github.yml config/secrets.yml
+    - name: Setup MySQL
+      # Workaround for MySQL in ACT until
+      # https://bugs.launchpad.net/ubuntu/focal/+source/mysql-8.0/+bug/1899248 is
+      # released
+      if: env.ACT
+      uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: '8.0'
+        root-password: root
+    - name: Start MySQL
+      if: ${{ !env.ACT }}
+      run: sudo /etc/init.d/mysql start
+    - name: Create DB
+      env:
+        RAILS_ENV: test
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:schema:load
+    - name: Run tests
+      run: |
+        bundle exec rspec
+    # prevent accidentally leaking secrets
+    - name: Remove test secrets
+      run: |
+        rm config/secrets.yml
