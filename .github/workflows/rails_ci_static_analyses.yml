@@ -9,17 +9,6 @@ on:
         required: false
         default: ""
 
-name: Ruby and/or Rails static analyses
-
-on:
-  workflow_call:
-    inputs:
-      cve-ignorelist:
-        description: "space-delimited string of CVEs to ignore"
-        type: string
-        required: false
-        default: ""
-
 jobs:
   static-analyses:
     runs-on: self-hosted
