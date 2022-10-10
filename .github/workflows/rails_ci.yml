@@ -1,0 +1,20 @@
+name: Ruby and/or Rails continuous integration workflow
+
+on:
+  workflow_call:
+    inputs:
+      cve-ignorelist:
+        description: "space-delimited string of CVEs to ignore"
+        type: string
+        required: false
+        default: ""
+
+jobs:
+  static-analyses:
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analyses.yml@main
+    secrets: inherit
+    with:
+      cve-ignorelist: ${{ inputs.cve-ignorelist }}
+  specs:
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci_tests.yml@main
+    secrets: inherit

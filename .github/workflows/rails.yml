@@ -8,135 +8,15 @@ on:
         type: string
         required: false
         default: ""
-      coyote-integration-tests:
-        description: "Does the repo need to run coyote integration tests?"
-        type: boolean
-        required: false
-        default: false
 
 jobs:
-  test-and-deploy:
-    runs-on: self-hosted
-    env:
-      RAILS_ENV: test
-      DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
-    steps:
-      - uses: actions/checkout@v3
-      - name: Configure sysctl limits on localhost to be able to run Elasticsearch
-        # Required to get Elasticsearch container to run on shgar host
-        shell: bash
-        if: inputs.coyote-integration-tests
-        run: |
-          sudo swapoff -a
-          sudo sysctl -w vm.swappiness=1
-          sudo sysctl -w fs.file-max=262144
-          sudo sysctl -w vm.max_map_count=262144
-      - name: Setup and start Elasticsearch
-        uses: tedconf/elasticsearch-github-actions@lee-self_hosted
-        if: inputs.coyote-integration-tests
-        with:
-          stack-version: 6.8.23
-          plugins: 'analysis-icu analysis-phonetic'
+  integration:
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@main
+    secrets: inherit
+    with:
+      cve-ignorelist: ${{ inputs.cve-ignorelist  }}
 
-      - name: Elasticsearch is reachable
-        if: inputs.coyote-integration-tests
-        run: |
-          curl --verbose --show-error http://localhost:9200
-
-      # Setup SSH agent first to allow for checking out repos using SSH, as needed
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
-      - name: Check for SASL dependencies
-        id: sasl
-        run: |
-          echo ::set-output name=dependency::$(grep memcached Gemfile.lock | wc -l)
-      - name: Install SASL
-        if: steps.sasl.outputs.dependency > 0
-        run: |
-          sudo apt-get -y install libsasl2-dev
-      - name: Set up Ruby
-        # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
-        # change this to ruby/setup-ruby@v1 (see
-        # https://github.com/ruby/setup-ruby#versioning)
-        uses: ruby/setup-ruby@v1.111.0
-        env:
-          BUNDLE_RUBYGEMS__TED__COM: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
-        with:
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-      - name: Update bundle-audit
-        run: bundle exec bundle-audit update
-      - name: Gem audit (with CVE ignorelist)
-        if: inputs.cve-ignorelist != ''
-        run: |
-          bundle exec bundler-audit --ignore ${{ inputs.cve-ignorelist }}
-      - name: Gem audit (without CVE ignorelist)
-        if: inputs.cve-ignorelist == ''
-        run: bundle exec bundler-audit
-      - name: Scan code for vulnerabilities
-        run: |
-          bundle exec brakeman -q -w2
-      - name: Run rubocop linters
-        run: |
-          bundle exec rubocop --parallel
-      - name: Set up test secrets
-        run: cp config/secrets.github.yml config/secrets.yml
-      - name: Setup MySQL
-        # Workaround for MySQL in ACT until
-        # https://bugs.launchpad.net/ubuntu/focal/+source/mysql-8.0/+bug/1899248 is
-        # released
-        if: env.ACT
-        uses: shogo82148/actions-setup-mysql@v1
-        with:
-          mysql-version: '8.0'
-          root-password: root
-      - name: Start MySQL
-        if: ${{ !env.ACT }}
-        run: sudo /etc/init.d/mysql start
-      - name: Create DB
-        env:
-          RAILS_ENV: test
-        run: |
-          bundle exec rails db:create
-          bundle exec rails db:schema:load
-      - name: Run tests
-        run: |
-          bundle exec rspec
-      # prevent accidentally leaking secrets
-      - name: Remove test secrets
-        run: |
-          rm config/secrets.yml
-      - name: Import GPG key
-        if: ${{ !env.ACT }}
-        uses: crazy-max/ghaction-import-gpg@v4
-        with:
-          gpg_private_key: ${{ secrets.RAILS_GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.RAILS_GPG_PASSPHRASE }}
-      - name: Add gateway to known hosts
-        if: ${{ (github.ref == 'refs/heads/master' || contains(github.ref, 'fbranch')) && !env.ACT }}
-        env:
-          TED_SSH_PORT: ${{ secrets.TED_SSH_PORT }}
-          TED_BASTION_HOST_NAME: ${{ secrets.TED_BASTION_HOST_NAME }}
-          TED_BASTION_HOST_NAME_CNAME: ${{ secrets.TED_BASTION_HOST_NAME_CNAME }}
-        run: |
-          ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME >> ~/.ssh/known_hosts
-          ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME_CNAME >> ~/.ssh/known_hosts
-      - name: Feature branch upload configuration
-        if: ${{ !env.ACT && contains(github.ref, 'fbranch') }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
-        # suppress tty output
-        shell: 'script --return --quiet --command "bash {0}"'
-        run: |
-          bundle exec cap staging git:${GITHUB_REF##*/} nginx:upload_site_config unicorn:upload_initd
-      - name: Stage branch
-        if: ${{ (github.ref == 'refs/heads/master' || contains(github.ref, 'fbranch')) && !env.ACT }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
-        # supress tty output
-        shell: 'script --return --quiet --command "bash {0}"'
-        run: |
-          bundle exec cap staging git:${GITHUB_REF##*/} deploy unicorn:restart nginx:reload with_database=false create_dns=true
+  deployment:
+    needs: integration
+    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@main
+    secrets: inherit
