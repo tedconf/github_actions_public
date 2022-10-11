@@ -28,10 +28,9 @@ This workflow runs two workflows in parallel:
 - rails_ci_static_analyses
 - rails_ci_tests
 
-This workflow is also meant to handle and/or install certain system
-dependencies through the [setup-ruby](https://github.com/tedconf/setup-ruby)
-and
-[install-ruby-dependency-action](https://github.com/tedconf/install-ruby-dependency-action),
+It is also meant to handle and/or install certain system dependencies through
+the [setup-ruby](https://github.com/tedconf/setup-ruby) and
+[install-ruby-dependency-action](https://github.com/tedconf/install-ruby-dependency-action)
 composite actions, although these dependencies need to be added manually and
 specific requirements might be missing.
 
