@@ -1,3 +1,8 @@
+# 1.0.2 (2022-10-11)
+- Fixes ruby gem CI by adding conditionals for:
+  - db creation
+  - brakeman
+
 # 1.0.1 (2022-10-11)
 - Adds `main` branch to CD workflows
 

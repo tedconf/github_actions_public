@@ -2,6 +2,12 @@ name: Ruby and/or Rails static analyses
 
 on:
   workflow_call:
+    inputs:
+      ruby-version:
+        description: "Ruby version to install"
+        type: string
+        required: false
+        default: ""
 
 jobs:
   specs:
@@ -10,10 +16,11 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
     steps:
-      - uses: tedconf/setup-ruby@1.0.2
+      - uses: tedconf/setup-ruby@1.0.3
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
+          ruby-version: ${{ inputs.ruby-version }}
       - name: Check for coyote gem
         shell: bash
         id: coyote
@@ -39,21 +46,33 @@ jobs:
         if: steps.coyote.outputs.count > 0
         run: |
           curl --verbose --show-error http://localhost:9200
+      - name: Check if database is needed
+        id: db
+        shell: bash
+        run: |
+          if [ -f "./config/database.yml" ]; then
+            echo ::set-output name=required::1
+          else
+            echo ::set-output name=required::0
+          fi
+
       - name: Set up test secrets
+        if: steps.db.outputs.required > 0
         run: cp config/secrets.github.yml config/secrets.yml
       - name: Setup MySQL
         # Workaround for MySQL in ACT until
         # https://bugs.launchpad.net/ubuntu/focal/+source/mysql-8.0/+bug/1899248 is
         # released
-        if: env.ACT
+        if: steps.db.outputs.required > 0 && env.ACT
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: '8.0'
           root-password: root
       - name: Start MySQL
-        if: ${{ !env.ACT }}
+        if: ${{ steps.db.outputs.required > 0 && !env.ACT }}
         run: sudo /etc/init.d/mysql start
       - name: Create DB
+        if: steps.db.outputs.required > 0
         env:
           RAILS_ENV: test
         run: |
@@ -64,5 +83,6 @@ jobs:
           bundle exec rspec
       # prevent accidentally leaking secrets
       - name: Remove test secrets
+        if: steps.db.outputs.required > 0
         run: |
           rm config/secrets.yml

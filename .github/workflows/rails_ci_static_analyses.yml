@@ -8,15 +8,21 @@ on:
         type: string
         required: false
         default: ""
+      ruby-version:
+        description: "Ruby version to install"
+        type: string
+        required: false
+        default: ""
 
 jobs:
   static-analyses:
     runs-on: self-hosted
     steps:
-      - uses: tedconf/setup-ruby@1.0.2
+      - uses: tedconf/setup-ruby@1.0.3
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
+          ruby-version: ${{ inputs.ruby-version }}
       - name: Update bundle-audit
         run: bundle exec bundle-audit update
       - name: Gem audit (with CVE ignorelist)
@@ -26,7 +32,14 @@ jobs:
       - name: Gem audit (without CVE ignorelist)
         if: inputs.cve-ignorelist == ''
         run: bundle exec bundler-audit
+      - name: Check brakeman requirement
+        shell: bash
+        id: brakeman
+        # We grep the Gemfile because ruby gems don't have Gemfile.lock
+        run: |
+          echo "::set-output name=references::$(grep brakeman Gemfile | wc -l)"
       - name: Scan code for vulnerabilities
+        if: steps.brakeman.outputs.references > 0
         run: |
           bundle exec brakeman -q -w2
       - name: Run rubocop linters
