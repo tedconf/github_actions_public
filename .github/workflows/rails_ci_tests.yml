@@ -39,21 +39,33 @@ jobs:
         if: steps.coyote.outputs.count > 0
         run: |
           curl --verbose --show-error http://localhost:9200
+      - name: Check if database is needed
+        id: db
+        shell: bash
+        run: |
+          if test [-f "./config/database.yml"]; then
+            echo ::set-output name=required::1
+          else
+            echo ::set-output name=required::0
+          fi
+
       - name: Set up test secrets
+        if: steps.db.outputs.required > 0
         run: cp config/secrets.github.yml config/secrets.yml
       - name: Setup MySQL
         # Workaround for MySQL in ACT until
         # https://bugs.launchpad.net/ubuntu/focal/+source/mysql-8.0/+bug/1899248 is
         # released
-        if: env.ACT
+        if: steps.db.outputs.required > 0 && env.ACT
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: '8.0'
           root-password: root
       - name: Start MySQL
-        if: ${{ !env.ACT }}
+        if: ${{ steps.db.outputs.required > 0 && !env.ACT }}
         run: sudo /etc/init.d/mysql start
       - name: Create DB
+        if: steps.db.outputs.required > 0
         env:
           RAILS_ENV: test
         run: |
@@ -64,5 +76,6 @@ jobs:
           bundle exec rspec
       # prevent accidentally leaking secrets
       - name: Remove test secrets
+        if: steps.db.outputs.required > 0
         run: |
           rm config/secrets.yml
