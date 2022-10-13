@@ -47,32 +47,31 @@ jobs:
         run: |
           curl --verbose --show-error http://localhost:9200
       - name: Check if database is needed
-        id: db
         shell: bash
         run: |
+          has_db_yml=0
           if [ -f "./config/database.yml" ]; then
-            echo ::set-output name=required::1
-          else
-            echo ::set-output name=required::0
+            has_db_yml=1
           fi
+          echo "uses_db=$has_db_yml" >> $GITHUB_ENV
 
       - name: Set up test secrets
-        if: steps.db.outputs.required > 0
+        if: env.uses_db > 0
         run: cp config/secrets.github.yml config/secrets.yml
       - name: Setup MySQL
         # Workaround for MySQL in ACT until
         # https://bugs.launchpad.net/ubuntu/focal/+source/mysql-8.0/+bug/1899248 is
         # released
-        if: steps.db.outputs.required > 0 && env.ACT
+        if: env.uses_db > 0 && env.ACT
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: '8.0'
           root-password: root
       - name: Start MySQL
-        if: ${{ steps.db.outputs.required > 0 && !env.ACT }}
+        if: ${{ env.uses_db > 0 && !env.ACT }}
         run: sudo /etc/init.d/mysql start
       - name: Create DB
-        if: steps.db.outputs.required > 0
+        if: env.uses_db > 0
         env:
           RAILS_ENV: test
         run: |
@@ -83,6 +82,6 @@ jobs:
           bundle exec rspec
       # prevent accidentally leaking secrets
       - name: Remove test secrets
-        if: steps.db.outputs.required > 0
+        if: env.uses_db > 0
         run: |
           rm config/secrets.yml
