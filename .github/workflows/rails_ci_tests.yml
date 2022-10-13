@@ -23,13 +23,12 @@ jobs:
           ruby-version: ${{ inputs.ruby-version }}
       - name: Check for coyote gem
         shell: bash
-        id: coyote
         run: |
-          echo "::set-output name=count::$(grep coyote Gemfile.lock | wc -l)"
+          echo "coyote_count=$(grep coyote Gemfile.lock | wc -l)" >> $GITHUB_ENV
       - name: Configure sysctl limits on localhost to be able to run Elasticsearch
         # Required to get Elasticsearch container to run on shgar host
         shell: bash
-        if: steps.coyote.outputs.count > 0
+        if:  env.coyote_count > 0
         run: |
           sudo swapoff -a
           sudo sysctl -w vm.swappiness=1
@@ -37,13 +36,13 @@ jobs:
           sudo sysctl -w vm.max_map_count=262144
       - name: Setup and start Elasticsearch
         uses: tedconf/elasticsearch-github-actions@lee-self_hosted
-        if: steps.coyote.outputs.count > 0
+        if: env.coyote_count > 0
         with:
           stack-version: 6.8.23
           plugins: 'analysis-icu analysis-phonetic'
 
       - name: Elasticsearch is reachable
-        if: steps.coyote.outputs.count > 0
+        if: env.coyote_count > 0
         run: |
           curl --verbose --show-error http://localhost:9200
       - name: Check if database is needed
