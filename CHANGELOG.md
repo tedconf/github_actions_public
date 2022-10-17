@@ -1,3 +1,6 @@
+# 1.2.0 (2022-10-13)
+- Updates variable syntax
+
 # 1.1.0 (2022-10-11)
 - Adds support for ruby gem CI:
   - Adds conditionals for:
