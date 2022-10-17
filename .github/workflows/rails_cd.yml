@@ -22,7 +22,6 @@ jobs:
           gpg_private_key: ${{ secrets.RAILS_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.RAILS_GPG_PASSPHRASE }}
       - name: Add gateway to known hosts
-        if: ${{ contains(github.ref, 'fbranch')) }}
         env:
           TED_SSH_PORT: ${{ secrets.TED_SSH_PORT }}
           TED_BASTION_HOST_NAME: ${{ secrets.TED_BASTION_HOST_NAME }}
@@ -38,9 +37,15 @@ jobs:
         # suppress tty output
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
-          bundle exec cap staging git:${GITHUB_REF##*/} nginx:upload_site_config unicorn:upload_initd deploy unicorn:restart nginx:reload with_database=false create_dns=true
+          bundle exec cap staging git:${GITHUB_REF##*/} \
+            nginx:upload_site_config \
+            unicorn:upload_initd deploy \
+            unicorn:restart \
+            nginx:reload \
+            with_database=false \
+            create_dns=true
       - name: Deploy main branch to staging
-        if: ${{github.ref_name == 'main' || github_ref_name == 'master' }}
+        if: ${{github.ref_name == 'main' || github.ref_name == 'master' }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
