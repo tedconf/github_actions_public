@@ -16,20 +16,19 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
     steps:
-      - uses: tedconf/setup-ruby@1.0.3
+      - uses: tedconf/setup-ruby@1.1.0
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
           ruby-version: ${{ inputs.ruby-version }}
       - name: Check for coyote gem
         shell: bash
-        id: coyote
         run: |
-          echo "::set-output name=count::$(grep coyote Gemfile.lock | wc -l)"
+          echo "coyote_count=$(grep coyote Gemfile.lock | wc -l)" >> $GITHUB_ENV
       - name: Configure sysctl limits on localhost to be able to run Elasticsearch
         # Required to get Elasticsearch container to run on shgar host
         shell: bash
-        if: steps.coyote.outputs.count > 0
+        if:  env.coyote_count > 0
         run: |
           sudo swapoff -a
           sudo sysctl -w vm.swappiness=1
@@ -37,42 +36,41 @@ jobs:
           sudo sysctl -w vm.max_map_count=262144
       - name: Setup and start Elasticsearch
         uses: tedconf/elasticsearch-github-actions@lee-self_hosted
-        if: steps.coyote.outputs.count > 0
+        if: env.coyote_count > 0
         with:
           stack-version: 6.8.23
           plugins: 'analysis-icu analysis-phonetic'
 
       - name: Elasticsearch is reachable
-        if: steps.coyote.outputs.count > 0
+        if: env.coyote_count > 0
         run: |
           curl --verbose --show-error http://localhost:9200
       - name: Check if database is needed
-        id: db
         shell: bash
         run: |
+          has_db_yml=0
           if [ -f "./config/database.yml" ]; then
-            echo ::set-output name=required::1
-          else
-            echo ::set-output name=required::0
+            has_db_yml=1
           fi
+          echo "uses_db=$has_db_yml" >> $GITHUB_ENV
 
       - name: Set up test secrets
-        if: steps.db.outputs.required > 0
+        if: env.uses_db > 0
         run: cp config/secrets.github.yml config/secrets.yml
       - name: Setup MySQL
         # Workaround for MySQL in ACT until
         # https://bugs.launchpad.net/ubuntu/focal/+source/mysql-8.0/+bug/1899248 is
         # released
-        if: steps.db.outputs.required > 0 && env.ACT
+        if: env.uses_db > 0 && env.ACT
         uses: shogo82148/actions-setup-mysql@v1
         with:
           mysql-version: '8.0'
           root-password: root
       - name: Start MySQL
-        if: ${{ steps.db.outputs.required > 0 && !env.ACT }}
+        if: ${{ env.uses_db > 0 && !env.ACT }}
         run: sudo /etc/init.d/mysql start
       - name: Create DB
-        if: steps.db.outputs.required > 0
+        if: env.uses_db > 0
         env:
           RAILS_ENV: test
         run: |
@@ -83,6 +81,6 @@ jobs:
           bundle exec rspec
       # prevent accidentally leaking secrets
       - name: Remove test secrets
-        if: steps.db.outputs.required > 0
+        if: env.uses_db > 0
         run: |
           rm config/secrets.yml

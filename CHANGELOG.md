@@ -1,3 +1,7 @@
+# 1.2.0 (2022-10-13)
+- Updates variable syntax per [Github
+  docs](https://github.blog/changelog/2020-10-01-github-actions-deprecating-set-env-and-add-path-commands/)
+
 # 1.1.0 (2022-10-11)
 - Adds support for ruby gem CI:
   - Adds conditionals for:

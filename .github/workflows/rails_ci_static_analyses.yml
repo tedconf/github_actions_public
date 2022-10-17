@@ -18,7 +18,7 @@ jobs:
   static-analyses:
     runs-on: self-hosted
     steps:
-      - uses: tedconf/setup-ruby@1.0.3
+      - uses: tedconf/setup-ruby@1.1.0
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
@@ -34,12 +34,11 @@ jobs:
         run: bundle exec bundler-audit
       - name: Check brakeman requirement
         shell: bash
-        id: brakeman
         # We grep the Gemfile because ruby gems don't have Gemfile.lock
         run: |
-          echo "::set-output name=references::$(grep brakeman Gemfile | wc -l)"
+          echo "brakeman_count=$(grep brakeman Gemfile | wc -l)" >> $GITHUB_ENV
       - name: Scan code for vulnerabilities
-        if: steps.brakeman.outputs.references > 0
+        if: env.brakeman_count > 0
         run: |
           bundle exec brakeman -q -w2
       - name: Run rubocop linters
