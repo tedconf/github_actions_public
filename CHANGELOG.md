@@ -1,3 +1,7 @@
+# 1.2.1 (2022-10-17)
+- Separates main and feature branch deployments to improve capistrano
+  compatibility issues (not all repos have cap that supports branch deployment)
+
 # 1.2.0 (2022-10-13)
 - Updates variable syntax per [Github
   docs](https://github.blog/changelog/2020-10-01-github-actions-deprecating-set-env-and-add-path-commands/)
