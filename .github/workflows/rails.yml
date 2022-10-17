@@ -8,15 +8,21 @@ on:
         type: string
         required: false
         default: ""
+      ruby-version:
+        description: "Ruby version to install"
+        type: string
+        required: false
+        default: ""
 
 jobs:
   integration:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@main
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@1.0.2
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist  }}
+      ruby-version: ${{ inputs.ruby-version }}
 
   deployment:
     needs: integration
-    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@main
+    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@1.0.2
     secrets: inherit

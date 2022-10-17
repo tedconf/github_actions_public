@@ -8,13 +8,21 @@ on:
         type: string
         required: false
         default: ""
+      ruby-version:
+        description: "Ruby version to install"
+        type: string
+        required: false
+        default: ""
 
 jobs:
   static-analyses:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analyses.yml@main
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analyses.yml@1.0.2
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist }}
+      ruby-version: ${{ inputs.ruby-version }}
   specs:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci_tests.yml@main
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci_tests.yml@1.0.2
     secrets: inherit
+    with:
+      ruby-version: ${{ inputs.ruby-version }}
