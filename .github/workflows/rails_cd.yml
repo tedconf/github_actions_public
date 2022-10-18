@@ -7,6 +7,12 @@ on:
       - master
       - main
       - '*fbranch*'
+    tags:
+      - '[0-9]+_[0-9]+'
+  pull_request:
+    types: [closed]
+    branch:
+      - '*fbranch*'
 
 jobs:
   continuous-deployment:
@@ -30,7 +36,7 @@ jobs:
           ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME >> ~/.ssh/known_hosts
           ssh-keyscan -p $TED_SSH_PORT $TED_BASTION_HOST_NAME_CNAME >> ~/.ssh/known_hosts
       - name: Deploy feature branch to staging
-        if: ${{ contains(github.ref, 'fbranch') }}
+        if: ${{ github.event_name == 'push' && contains(github.ref_name, 'fbranch') }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
@@ -39,13 +45,23 @@ jobs:
         run: |
           bundle exec cap staging git:${GITHUB_REF##*/} \
             nginx:upload_site_config \
-            unicorn:upload_initd deploy \
+            unicorn:upload_initd \
+            deploy \
             unicorn:restart \
             nginx:reload \
             with_database=false \
             create_dns=true
+      - name: Feature branch teardown
+        if: ${{ github.event_name }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
+        shell: 'script --return --quiet --command "bash {0}"'
+        run: |
+          echo "Teardown on event name: ${{ github.event_name }}"
+          #bundle exec cap staging git:${GITHUB_REF##*/} deploy:teardown
       - name: Deploy main branch to staging
-        if: ${{github.ref_name == 'main' || github.ref_name == 'master' }}
+        if: ${{ github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master') }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
@@ -53,3 +69,8 @@ jobs:
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           bundle exec cap staging deploy
+      - name: Deploy main branch to production
+        if: ${{github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+        shell: 'script --return --quiet --command "bash {0}"'
+        run:
+          echo "bundle exec cap produciton deploy"
