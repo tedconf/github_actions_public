@@ -1,18 +1,7 @@
-name: Rails continuous deployment workflow
+name: Rails workflow for deployment and deployment-related processes
 
 on:
   workflow_call:
-  push:
-    branches:
-      - master
-      - main
-      - '*fbranch*'
-    tags:
-      - '[0-9]+_[0-9]+'
-  pull_request:
-    types: [closed]
-    branch:
-      - '*fbranch*'
 
 jobs:
   continuous-deployment:
@@ -51,15 +40,6 @@ jobs:
             nginx:reload \
             with_database=false \
             create_dns=true
-      - name: Feature branch teardown
-        if: ${{ github.event_name }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TEDCONF_GH_ACTIONS_AWS_SECRET_ACCESS_KEY }}
-        shell: 'script --return --quiet --command "bash {0}"'
-        run: |
-          echo "Teardown on event name: ${{ github.event_name }}"
-          #bundle exec cap staging git:${GITHUB_REF##*/} deploy:teardown
       - name: Deploy main branch to staging
         if: ${{ github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master') }}
         env:
@@ -69,8 +49,18 @@ jobs:
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
           bundle exec cap staging deploy
+      - name: Check github reference for production tag format
+        if: ${{github.ref_type == 'tag' }}
+        shell: bash
+        run: |
+          has_prod_tag=0
+          if [[ ${{ github.ref_name }} =~ [0-9]{8}_[0-9]+ ]]; then
+            echo "Production tag found!"
+            has_prod_tag=1
+          fi
+          echo "production_tag=$has_prod_tag" >> $GITHUB_ENV
       - name: Deploy main branch to production
-        if: ${{github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+        if: env.production_tag == 1
         shell: 'script --return --quiet --command "bash {0}"'
-        run:
-          echo "bundle exec cap produciton deploy"
+        run: |
+          bundle exec cap production deploy
