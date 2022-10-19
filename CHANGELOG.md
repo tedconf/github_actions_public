@@ -1,3 +1,7 @@
+# 2.0.0 (2022-10-19)
+- Adds support to trigger production deployments based on `MMMMYYDD_HHMM` tag
+  format
+
 # 1.2.1 (2022-10-17)
 - Separates main and feature branch deployments to improve capistrano
   compatibility issues (not all repos have cap that supports branch deployment)
