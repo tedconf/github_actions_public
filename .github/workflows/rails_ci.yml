@@ -16,13 +16,13 @@ on:
 
 jobs:
   static-analyses:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analyses.yml@v2.0.0
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analyses.yml@v2.0.1
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist }}
       ruby-version: ${{ inputs.ruby-version }}
   specs:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci_tests.yml@v2.0.0
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci_tests.yml@v2.0.1
     secrets: inherit
     with:
       ruby-version: ${{ inputs.ruby-version }}
