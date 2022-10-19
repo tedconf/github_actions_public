@@ -22,13 +22,14 @@ jobs:
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
           ruby-version: ${{ inputs.ruby-version }}
       - name: Check for coyote gem
+        id: coyote
         shell: bash
         run: |
-          echo "coyote_count=$(grep coyote Gemfile.lock | wc -l)" >> $GITHUB_ENV
+          echo "COUNT=$(grep coyote Gemfile* | wc -l)" >> $GITHUB_OUTPUT
       - name: Configure sysctl limits on localhost to be able to run Elasticsearch
         # Required to get Elasticsearch container to run on shgar host
         shell: bash
-        if:  env.coyote_count > 0
+        if:  steps.coyote.outputs.COUNT > 0
         run: |
           sudo swapoff -a
           sudo sysctl -w vm.swappiness=1
@@ -36,26 +37,27 @@ jobs:
           sudo sysctl -w vm.max_map_count=262144
       - name: Setup and start Elasticsearch
         uses: tedconf/elasticsearch-github-actions@lee-self_hosted
-        if: env.coyote_count > 0
+        if: steps.coyote.output.COUNT > 0
         with:
           stack-version: 6.8.23
           plugins: 'analysis-icu analysis-phonetic'
 
       - name: Elasticsearch is reachable
-        if: env.coyote_count > 0
+        if: steps.coyote.outputs.COUNT > 0
         run: |
           curl --verbose --show-error http://localhost:9200
       - name: Check if database is needed
+        id: uses_db
         shell: bash
         run: |
           has_db_yml=0
           if [ -f "./config/database.yml" ]; then
             has_db_yml=1
           fi
-          echo "uses_db=$has_db_yml" >> $GITHUB_ENV
+          echo "USES_DB=$has_db_yml" >> $GITHUB_OUTPUT
 
       - name: Set up test secrets
-        if: env.uses_db > 0
+        if: steps.uses_db.outputs.USES_DB > 0
         run: cp config/secrets.github.yml config/secrets.yml
       - name: Setup MySQL
         # Workaround for MySQL in ACT until
