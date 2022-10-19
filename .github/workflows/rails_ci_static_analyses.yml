@@ -33,12 +33,12 @@ jobs:
         if: inputs.cve-ignorelist == ''
         run: bundle exec bundler-audit
       - name: Check brakeman requirement
+        id: brakeman
         shell: bash
-        # We grep the Gemfile because ruby gems don't have Gemfile.lock
         run: |
-          echo "brakeman_count=$(grep brakeman Gemfile | wc -l)" >> $GITHUB_ENV
+          echo "COUNT=$(grep brakeman Gemfile* | wc -l)" >> $GITHUB_OUTPUT
       - name: Scan code for vulnerabilities
-        if: env.brakeman_count > 0
+        if: steps.brakeman.outputs.COUNT > 0
         run: |
           bundle exec brakeman -q -w2
       - name: Run rubocop linters
