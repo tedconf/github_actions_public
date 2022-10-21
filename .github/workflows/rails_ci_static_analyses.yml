@@ -40,7 +40,7 @@ jobs:
       - name: Scan code for vulnerabilities
         if: steps.brakeman.outputs.COUNT > 0
         run: |
-          bundle exec brakeman -q -w2
+          bundle exec brakeman -q -w2 --force
       - name: Run rubocop linters
         run: |
           bundle exec rubocop --parallel
