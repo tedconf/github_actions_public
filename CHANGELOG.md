@@ -1,3 +1,8 @@
+# 2.0.1 (2022-10-21)
+- Updates output variable syntax again, which [Github changed
+  AGAIN](https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/)
+- Adds `--force` option to brakeman for Gem repos that have it installed 
+
 # 2.0.0 (2022-10-19)
 - Adds support to trigger production deployments based on `MMMMYYDD_HHMM` tag
   format
