@@ -13,16 +13,22 @@ on:
         type: string
         required: false
         default: ""
+      bundler-version:
+        description: "Bundler version to install"
+        type: string
+        required: false
+        default: "Gemfile.lock"
 
 jobs:
   integration:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@v2.0.1
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@v2.0.2
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist  }}
       ruby-version: ${{ inputs.ruby-version }}
+      bundler-version: ${{ inputs.bundler-version }}
 
   deployment:
     needs: integration
-    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@v2.0.1
+    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@v2.0.2
     secrets: inherit
