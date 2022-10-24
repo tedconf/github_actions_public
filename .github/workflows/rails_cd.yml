@@ -7,7 +7,7 @@ jobs:
   continuous-deployment:
     runs-on: self-hosted
     steps:
-      - uses: tedconf/setup-ruby@v1.1.2
+      - uses: tedconf/setup-ruby@v1.1.3
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
