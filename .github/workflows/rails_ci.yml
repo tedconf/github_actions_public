@@ -19,7 +19,6 @@ on:
         required: false
         default: "Gemfile.lock"
 
-
 jobs:
   static-analyses:
     uses: tedconf/github_actions_public/.github/workflows/rails_ci_static_analyses.yml@v2.0.2
@@ -33,3 +32,4 @@ jobs:
     secrets: inherit
     with:
       ruby-version: ${{ inputs.ruby-version }}
+      bundler-version: ${{ inputs.bundler-version }}
