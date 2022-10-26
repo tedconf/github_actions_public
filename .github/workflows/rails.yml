@@ -14,7 +14,8 @@ on:
         required: false
         default: ""
       bundler-version:
-        description: "Bundler version to install"
+        description: "Override to specify bundler version to use"
+        # Acceptable values: https://github.com/ruby/setup-ruby/blob/master/action.yml#L19
         type: string
         required: false
         default: "Gemfile.lock"
