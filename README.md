@@ -40,10 +40,14 @@ container to pass. This workflow both detects if coyote tests need to be run
 and if so, sets up ES automatically for you. 
 
 ## rails_cd.yml
-Currently this workflow deploys to staging whenever `master` or `main` are updated.
+Currently this workflow:
+- deploys to **staging** whenever `master` or `main` are updated;
+- as of v2.0.0, deploys to **production** whenever a tag with the format
+  `YYYYMMDD_HHmm` is pushed, where the time component is in 24-hour UTC time
+  (e.g.  `20221027_2255`). You can optionally include seconds in the tag, e.g.
+  `20221027_225544`.
 
 Future features include:
-- Production deployments
 - Feature branch teardown
 
 ## Ruby Gems
