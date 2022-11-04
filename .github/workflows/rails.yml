@@ -22,7 +22,7 @@ on:
 
 jobs:
   integration:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@v2.0.2
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@v2.0.3
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist  }}
@@ -31,5 +31,5 @@ jobs:
 
   deployment:
     needs: integration
-    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@v2.0.2
+    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@v2.0.3
     secrets: inherit
