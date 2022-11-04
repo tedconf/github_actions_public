@@ -22,7 +22,7 @@ uses: tedconf/github_actions_public/.github/workflows/rails.yml@{git ref}
 
 The variable `{git ref}` can refer to a SHA, tag, or branch name.
 
-## rails_ci.yml
+## Continuous Integration (rails_ci.yml)
 This workflow runs two workflows in parallel:
 
 - rails_ci_static_analyses
@@ -39,16 +39,31 @@ the suite of coyote integration tests, which need an Elasticsearch docker
 container to pass. This workflow both detects if coyote tests need to be run
 and if so, sets up ES automatically for you. 
 
-## rails_cd.yml
+## Continuous Deployment (rails_cd.yml)
 Currently this workflow:
 - deploys to **staging** whenever `master` or `main` are updated;
-- as of v2.0.0, deploys to **production** whenever a tag with the format
-  `YYYYMMDD_HHmm` is pushed, where the time component is in 24-hour UTC time
-  (e.g.  `20221027_2255`). You can optionally include seconds in the tag, e.g.
-  `20221027_225544`.
+- deploys feature branches to **staging**
+  ([details](#feature-branch-deployments));
+- as of v2.0.0, deploys to **production** whenever a tag using a
+  `YYYYMMDD_HHmm` format is pushed ([details](#production-deployments)).
 
-Future features include:
+### Feature Branch Deployments
+Any feature branch that includes the string `fbranch` anywhere in its branch
+name will deploy to staging.
+
+**NOTE**: Feature branch teardown isn't supported yet, so for the time being,
+this responsibility still falls on the developer.
+
+### Production Deployments
+For any repo that includes the `rails_cd.yml` workflow with a version of at
+least `v2.0.0`, production deployments happen via `ted-capistrano3` when tags
+in with the `YYYYMMDD_HHmm` format are pushed. The time component is in 24-hour
+UTC time (e.g. `20221027_2255`), and you can optionally include seconds in the
+tag, e.g. `20221027_225544`.
+
+### Future Features
 - Feature branch teardown
+- ted-capistrano recipe to make tagging easier
 
 ## Ruby Gems
 If your repo is **not** a full Rails application and is instead a Ruby Gem, you
