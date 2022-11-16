@@ -9,7 +9,14 @@ callers.
 # Inputs and Secrets
 Inputs and secrets can be passed in from the caller to be used by the called
 (i.e. reusable) workflow. You can see what inputs and secrets are used by the
-reusable workflow by looking under its `on.workflow_call` section.
+reusable workflow by looking under its `on.workflow_call` section. Generally,
+the syntax is as follows:
+
+```
+  uses: <reusable workflow file>
+  with:
+    <parameter name>: <value>
+```
 
 # Rails
 The full workflow for a Rails app involves both CI and CD jobs, where CI
@@ -37,7 +44,20 @@ specific requirements might be missing.
 One requirement that is currently supported and also warrants highlighting is
 the suite of coyote integration tests, which need an Elasticsearch docker
 container to pass. This workflow both detects if coyote tests need to be run
-and if so, sets up ES automatically for you. 
+and if so, sets up ES automatically for you.
+
+### rails_ci_static_analyses
+
+#### Ignoring CVEs
+In the event that your client repo needs to ignore any CVEs, you can pass them
+into the workflows as `cve-ignorelist` inputs, e.g.:
+
+```
+  uses: <reusable workflow file>
+  with:
+    cve-ignorelist: 'CVE-1 CVE-2 ...'
+
+```
 
 ## Continuous Deployment (rails_cd.yml)
 Currently this workflow:
