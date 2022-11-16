@@ -3,6 +3,7 @@
   tedconf/setup-ruby); see
   [here](https://github.com/tedconf/setup-ruby/blob/main/CHANGELOG.md#v114-2022-11-11)
   for details
+- Adds bash scripts to facilitate updating versions/tags/references
 
 # v2.0.2 (2022-10-24)
 - Adds input parameter to specify bundler version to use (see
