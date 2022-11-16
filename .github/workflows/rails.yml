@@ -19,17 +19,23 @@ on:
         type: string
         required: false
         default: "Gemfile.lock"
+      rake-db-tasker:
+        description: 'Specify the gem to use for database tasks (to support Rails < 5)'
+        type: string
+        required: false
+        default: "rails"
 
 jobs:
   integration:
-    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@v2.0.3
+    uses: tedconf/github_actions_public/.github/workflows/rails_ci.yml@v2.0.4
     secrets: inherit
     with:
       cve-ignorelist: ${{ inputs.cve-ignorelist  }}
       ruby-version: ${{ inputs.ruby-version }}
       bundler-version: ${{ inputs.bundler-version }}
+      rake-db-tasker: ${{ inputs.rake-db-tasker }}
 
   deployment:
     needs: integration
-    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@v2.0.3
+    uses: tedconf/github_actions_public/.github/workflows/rails_cd.yml@v2.0.4
     secrets: inherit
