@@ -1,3 +1,6 @@
+# 2.0.4 (2022-12-14)
+- Add Sidekiq Pro secret key.
+
 # v2.0.3 (2022-11-11)
 - Updates ruby/setup-ruby version to get automatic updates and fixes (via
   tedconf/setup-ruby); see
@@ -13,7 +16,7 @@
 # v2.0.1 (2022-10-21)
 - Updates output variable syntax again, which [Github changed
   AGAIN](https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/)
-- Adds `--force` option to brakeman for Gem repos that have it installed 
+- Adds `--force` option to brakeman for Gem repos that have it installed
 
 # v2.0.0 (2022-10-19)
 - Adds support to trigger production deployments based on `MMMMYYDD_HHMM` tag
