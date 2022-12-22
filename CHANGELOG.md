@@ -1,3 +1,7 @@
+# 2.0.5 (2022-12-22)
+* Add support for Rails encrypted credentials master key.
+* Do not try and copy non-existent secrets file for Rails 7 creds.
+
 # 2.0.4 (2022-12-14)
 - Add Sidekiq Pro secret key.
 

@@ -27,13 +27,14 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
     steps:
-      - uses: tedconf/setup-ruby@v1.1.5
+      - uses: tedconf/setup-ruby@1.1.6
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
           contribsys-key: ${{ secrets.BUNDLE_GEMS__CONTRIBSYS__COM }}
           ruby-version: ${{ inputs.ruby-version }}
           bundler-version: ${{ inputs.bundler-version }}
+          rails-master-key: ${{ secrets.RAILS_MASTER_KEY }}
       - name: Check for coyote gem
         id: coyote
         shell: bash
@@ -69,8 +70,17 @@ jobs:
           fi
           echo "USES_DB=$has_db_yml" >> $GITHUB_OUTPUT
 
+      - name: Check if it uses the older secrets.yml for secrets.
+        id: has_secrets
+        shell: bash
+        run: |
+          has_secrets_yml=0
+          if [ -f "./config/secrets.github.yml" ]; then
+            has_secrets_yml=1
+          fi
+          echo "HAS_SECRETS=$has_secrets_yml" >> $GITHUB_OUTPUT
       - name: Set up test secrets
-        if: steps.uses_db.outputs.USES_DB > 0
+        if: steps.uses_db.outputs.USES_DB > 0 && steps.has_secrets.outputs.HAS_SECRETS > 0
         run: cp config/secrets.github.yml config/secrets.yml
       - name: Setup MySQL
         # Workaround for MySQL in ACT until
