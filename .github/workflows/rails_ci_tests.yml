@@ -113,6 +113,7 @@ jobs:
         env:
           RAILS_ENV: test
           REDIS_URL: 'redis://127.0.0.1'
+          TEST_DB_PASSWORD: root
         run: |
           bundle exec ${{ inputs.rake-db-tasker }} db:create
           bundle exec ${{ inputs.rake-db-tasker }} db:schema:load
