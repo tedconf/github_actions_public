@@ -27,6 +27,7 @@ jobs:
       RAILS_ENV: test
       DATABASE_URL: 'mysql2://127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      REDIS_URL: 'redis://127.0.0.1'
     services:
       redis:
         # Docker Hub image
@@ -112,7 +113,6 @@ jobs:
         if: steps.uses_db.outputs.USES_DB > 0
         env:
           RAILS_ENV: test
-          REDIS_URL: 'redis://127.0.0.1'
           TEST_DB_PASSWORD: root
         run: |
           bundle exec ${{ inputs.rake-db-tasker }} db:create
