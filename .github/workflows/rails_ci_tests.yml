@@ -75,6 +75,8 @@ jobs:
         if: steps.coyote.outputs.COUNT > 0
         run: |
           curl --verbose --show-error http://localhost:9200
+      - name: Test file encoding
+        run: file -i app/jobs/null_job.rb
       - name: Check if database is needed
         id: uses_db
         shell: bash
