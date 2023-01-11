@@ -113,6 +113,7 @@ jobs:
         if: steps.uses_db.outputs.USES_DB > 0
         env:
           RAILS_ENV: test
+          REDIS_HOST: 'redis://127.0.0.1'
         run: |
           bundle exec ${{ inputs.rake-db-tasker }} db:create
           bundle exec ${{ inputs.rake-db-tasker }} db:schema:load
