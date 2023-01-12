@@ -118,6 +118,8 @@ jobs:
         run: |
           bundle exec ${{ inputs.rake-db-tasker }} db:create
           bundle exec ${{ inputs.rake-db-tasker }} db:schema:load
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
       - name: Run tests
         run: |
           bundle exec rspec
