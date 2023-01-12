@@ -42,8 +42,8 @@ jobs:
           # Maps port 6379 on service container to the host
           - 6379:6379
     steps:
-      - name: Runner IP address
-        run: hostname -I
+      - name: SSH Details for Workflow Run
+        run: echo ssh $(dig +short myip.opendns.com @resolver1.opendns.com)
       - uses: tedconf/setup-ruby@v1.1.6
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
