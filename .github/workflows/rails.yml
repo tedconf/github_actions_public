@@ -26,6 +26,7 @@ on:
         default: "rails"
       install-ffmpeg:
         description: "Flag to install FFmpeg"
+        type: boolean
         default: false
         required: false
 
