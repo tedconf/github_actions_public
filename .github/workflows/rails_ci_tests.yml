@@ -33,19 +33,6 @@ jobs:
       DATABASE_URL: 'mysql2://root:root@127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       REDIS_URL: 'redis://127.0.0.1'
-#    services:
-#      redis:
-#        # Docker Hub image
-#        image: redis
-#        # Set health checks to wait until redis has started
-#        options: >-
-#          --health-cmd "redis-cli ping"
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
-#        ports:
-#          # Maps port 6379 on service container to the host
-#          - 6379:6379
     steps:
       - name: SSH Details for Workflow Run
         run: echo ssh $(curl 169.254.169.254/latest/meta-data/public-ipv4)
