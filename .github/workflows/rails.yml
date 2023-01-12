@@ -24,6 +24,10 @@ on:
         type: string
         required: false
         default: "rails"
+      install-ffmpeg:
+        description: "Flag to install FFmpeg"
+        default: false
+        required: false
 
 jobs:
   integration:
@@ -34,6 +38,7 @@ jobs:
       ruby-version: ${{ inputs.ruby-version }}
       bundler-version: ${{ inputs.bundler-version }}
       rake-db-tasker: ${{ inputs.rake-db-tasker }}
+      install-ffmpeg: ${{ inputs.install-ffmpeg }}
 
   deployment:
     needs: integration

@@ -18,6 +18,10 @@ on:
         type: string
         required: false
         default: "rails"
+      install-ffmpeg:
+        description: "Flag to install FFmpeg"
+        default: false
+        required: false
 
 jobs:
   specs:
@@ -42,6 +46,8 @@ jobs:
           # Maps port 6379 on service container to the host
           - 6379:6379
     steps:
+      - name: SSH Details for Workflow Run
+        run: echo ssh $(curl 169.254.169.254/latest/meta-data/public-ipv4)
       - uses: tedconf/setup-ruby@v1.1.6
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
@@ -116,6 +122,11 @@ jobs:
         run: |
           bundle exec ${{ inputs.rake-db-tasker }} db:create
           bundle exec ${{ inputs.rake-db-tasker }} db:schema:load
+      - name: Install FFmpeg
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
       - name: Run tests
         run: |
           bundle exec rspec
@@ -124,5 +135,3 @@ jobs:
         if: steps.uses_db.outputs.USES_DB > 0 && steps.has_secrets.outputs.HAS_SECRETS > 0
         run: |
           rm config/secrets.yml
-      - name: SSH Details for Workflow Run
-        run: echo ssh $(curl 169.254.169.254/latest/meta-data/public-ipv4)
