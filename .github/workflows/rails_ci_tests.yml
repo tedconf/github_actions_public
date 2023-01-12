@@ -129,6 +129,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
+          which ffmpeg
+          which ffprobe
       - name: Run tests
         run: |
           bundle exec rspec
