@@ -33,19 +33,19 @@ jobs:
       DATABASE_URL: 'mysql2://root:root@127.0.0.1' # shogo82148/actions-setup-mysql@v1 doesn't work with socket
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       REDIS_URL: 'redis://127.0.0.1'
-    services:
-      redis:
-        # Docker Hub image
-        image: redis
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps port 6379 on service container to the host
-          - 6379:6379
+#    services:
+#      redis:
+#        # Docker Hub image
+#        image: redis
+#        # Set health checks to wait until redis has started
+#        options: >-
+#          --health-cmd "redis-cli ping"
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
+#        ports:
+#          # Maps port 6379 on service container to the host
+#          - 6379:6379
     steps:
       - name: SSH Details for Workflow Run
         run: echo ssh $(curl 169.254.169.254/latest/meta-data/public-ipv4)
@@ -91,7 +91,19 @@ jobs:
             has_db_yml=1
           fi
           echo "USES_DB=$has_db_yml" >> $GITHUB_OUTPUT
-
+      - name: Check for Redis dependency
+        if: steps.uses_db.outputs.USES_DB > 0
+        id: redis
+        uses: tedconf/install-ruby-dependency-action@v1.1.3
+        with:
+          gem-name: redis
+          required-library: "redis-tools redis-server"
+        run: |
+          echo "USES_REDIS=1" >> $GITHUB_OUTPUT
+      - name: Wait for Redis
+        if: steps.redis.outputs.USES_REDIS > 0
+        run: |
+          redis-cli ping
       - name: Check if it uses the older secrets.yml for secrets.
         id: has_secrets
         shell: bash
@@ -130,6 +142,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
           sudo ln -sf $(which ffprobe) /usr/local/bin/ffprobe
+          sudo ln -sf $(which ffmpeg) /usr/local/bin/ffmpeg
       - name: Run tests
         run: |
           bundle exec rspec
