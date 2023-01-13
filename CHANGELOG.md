@@ -1,3 +1,8 @@
+# v2.0.6 (2023-01-12)
+* Adds CI support to install Redis (e.g. for Sidekiq)
+* Adds support to install FFmpeg
+* Adds line to print out runner IP to allow debugging via SSH
+
 # v2.0.5 (2022-12-22)
 * Add support for Rails encrypted credentials master key.
 * Do not try and copy non-existent secrets file for Rails 7 creds.
