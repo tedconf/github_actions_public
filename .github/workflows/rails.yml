@@ -29,6 +29,11 @@ on:
         type: boolean
         default: false
         required: false
+      precompile-assets:
+        description: "Precompile assets for rails app"
+        type: boolean
+        default: false
+        required: false
 
 jobs:
   integration:
@@ -40,6 +45,7 @@ jobs:
       bundler-version: ${{ inputs.bundler-version }}
       rake-db-tasker: ${{ inputs.rake-db-tasker }}
       install-ffmpeg: ${{ inputs.install-ffmpeg }}
+      precompile-assets: ${{ inputs.precompile-assets }}
 
   deployment:
     needs: integration
