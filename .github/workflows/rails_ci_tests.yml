@@ -137,6 +137,19 @@ jobs:
           sudo apt-get install -y ffmpeg
           sudo ln -sf $(which ffprobe) /usr/local/bin/ffprobe
           sudo ln -sf $(which ffmpeg) /usr/local/bin/ffmpeg
+      - name: Get Node.JS version
+        id: nvmrc
+        run: |
+          has_nvmrc=0
+          if [ -f "./.nvmrc" ]; then
+            has_nvmrc=1
+          fi
+          echo "EXISTS=$has_nvmrc" >> $GITHUB_OUTPUT
+      - name: Install Node.JS
+        uses: actions/setup-node@v3
+        if: steps.nvmrc.outputs.EXISTS > 0
+        with:
+          node-version-file: '.nvmrc'
       - name: Install yarn
         if: inputs.precompile-assets
         run: |
