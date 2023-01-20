@@ -6,6 +6,8 @@ on:
 jobs:
   continuous-deployment:
     runs-on: self-hosted
+    env:
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
       - name: Runner IP address (stays up only if an error happens)
         run: curl -s 169.254.169.254/latest/meta-data/public-ipv4
@@ -13,6 +15,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.TEDCONF_GH_ACTIONS_JENKINS_PRIV_SSH_KEY }}
           rubygems-key: ${{ secrets.BUNDLE_RUBYGEMS__TED__COM }}
+          rails-master-key: ${{ secrets.RAILS_MASTER_KEY }}
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v4
         with:
