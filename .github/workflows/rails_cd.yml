@@ -53,6 +53,7 @@ jobs:
         # supress tty output
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
+          ls -l config/credentials
           bundle exec cap staging deploy
       - name: Check github reference for production tag format
         if: ${{github.ref_type == 'tag' }}
