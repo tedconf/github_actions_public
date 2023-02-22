@@ -1,3 +1,9 @@
+# DEPRECATION WARNING
+This repo is deprecated in favor of the private
+[github_actions](https://github.com/tedconf/github_actions) repo. Please refer
+to the documentation therein. All development should now be forked from that
+repo.
+
 # github_actions_public
 
 This repository holds reusable Github Action workflows as well as example
