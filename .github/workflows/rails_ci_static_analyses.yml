@@ -21,7 +21,7 @@ on:
 
 jobs:
   static-analyses:
-    runs-on: self-hosted
+    runs-on: [ self-hosted, shgar-ubuntu20 ]
     steps:
       - uses: tedconf/setup-ruby@v1.1.3
         with:
